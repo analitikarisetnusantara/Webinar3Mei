@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Webinar Q&A — Sesi Tanya Jawab</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+
+<!-- ============================================================
+  KONFIGURASI FIREBASE — ganti nilai di bawah dengan milikmu
+  Cara mendapatkannya: https://console.firebase.google.com
+  Project Settings > General > Your apps > Firebase SDK snippet
+=============================================================== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getDatabase, ref, push, onValue, update, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  /* ── KONFIGURASI FIREBASE ────────────────────────────────── */
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDBfiLpGqWNQJGjkKgeV8w6USoarVD3944",
+    authDomain:        "tanyajawab-aa88c.firebaseapp.com",
+    databaseURL:       "https://tanyajawab-aa88c-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId:         "tanyajawab-aa88c",
+    storageBucket:     "tanyajawab-aa88c.firebasestorage.app",
+    messagingSenderId: "803628179800",
+    appId:             "1:803628179800:web:84dcd1ac5e85b28003852d"
+  };
+
+  /* ── KONFIGURASI WEBINAR — sesuaikan ─────────────────────── */
+  window.WEBINAR_TITLE    = "Webinar Metodologi Penelitian";
+  window.WEBINAR_SUBTITLE = "Kualitatif, Kuantitatif dan Mix Methods di Era AI";
+  window.ADMIN_PASSWORD   = "admin123"; // ganti password admin
+  /* ─────────────────────────────────────────────────────────── */
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+  window._db  = db;
+  window._ref = ref;
+  window._push = push;
+  window._onValue = onValue;
+  window._update = update;
+  window._serverTimestamp = serverTimestamp;
+  window._firebaseReady = true;
+  document.dispatchEvent(new Event("firebase-ready"));
+</script>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0b0f1a;
+    --surface:   #111827;
+    --surface2:  #1a2235;
+    --border:    rgba(255,255,255,0.08);
+    --border2:   rgba(255,255,255,0.14);
+    --accent:    #6c8bff;
+    --accent2:   #a78bfa;
+    --gold:      #f5c842;
+    --green:     #34d399;
+    --text:      #e8eaf0;
+    --muted:     #8892a4;
+    --card-r:    14px;
+    --font-h:    'DM Serif Display', serif;
+    --font-b:    'Sora', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-b);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HERO HEADER ── */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 56px 24px 48px;
+    text-align: center;
+    background: linear-gradient(160deg, #0d1530 0%, #0b0f1a 60%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(108,139,255,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 80% 110%, rgba(167,139,250,0.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(108,139,255,0.12);
+    border: 1px solid rgba(108,139,255,0.3);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: .04em;
+    margin-bottom: 20px;
+  }
+  .hero-badge .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100%{ box-shadow: 0 0 0 0 rgba(52,211,153,.5); }
+    50%    { box-shadow: 0 0 0 6px rgba(52,211,153,0); }
+  }
+  .hero h1 {
+    font-family: var(--font-h);
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 400;
+    line-height: 1.15;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+  }
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 28px;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .stat-lbl {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* ── LAYOUT ── */
+  .main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 32px 16px 80px;
+  }
+
+  /* ── FORM CARD ── */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--card-r);
+    padding: 28px;
+    margin-bottom: 32px;
+    animation: fadeUp .5s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(16px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  .form-card h2 {
+    font-family: var(--font-h);
+    font-size: 20px;
+    font-weight: 400;
+    color: #fff;
+    margin-bottom: 18px;
+  }
+  .form-row { margin-bottom: 14px; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+  input[type=text], textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 9px;
+    color: var(--text);
+    font-family: var(--font-b);
+    font-size: 14px;
+    padding: 11px 14px;
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+    resize: none;
+  }
+  input[type=text]:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,139,255,0.15);
+  }
+  textarea { min-height: 90px; line-height: 1.6; }
+  .char-count {
+    text-align: right;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .btn-submit {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    font-family: var(--font-b);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+    margin-top: 6px;
+  }
+  .btn-submit:hover { opacity: .88; }
+  .btn-submit:active { transform: scale(.98); }
+  .btn-submit:disabled { opacity: .4; cursor: not-allowed; }
+  .submit-toast {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: rgba(52,211,153,.12);
+    border: 1px solid rgba(52,211,153,.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--green);
+    margin-top: 12px;
+  }
+  .submit-toast.show { display: flex; }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .filter-tabs {
+    display: flex;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .tab-btn {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 7px;
+    font-family: var(--font-b);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    color: var(--muted);
+    background: transparent;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .q-count {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ── QUESTION CARDS ── */
+  #q-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--card-r);
+    padding: 18px 20px;
+    transition: border-color .2s;
+    animation: fadeUp .4s ease both;
+  }
+  .q-card:hover { border-color: var(--border2); }
+  .q-card.answered {
+    border-color: rgba(52,211,153,.22);
+    background: rgba(52,211,153,.03);
+  }
+
+  .q-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .q-meta { flex: 1; min-width: 0; }
+  .q-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: #fff;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .q-time {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .badge-answered {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(52,211,153,.15);
+    color: var(--green);
+    border: 1px solid rgba(52,211,153,.25);
+    border-radius: 100px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .q-text {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.65;
+    margin-bottom: 14px;
+  }
+
+  .q-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-upvote {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-family: var(--font-b);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+    user-select: none;
+  }
+  .btn-upvote:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-upvote.voted {
+    background: rgba(108,139,255,.12);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn-upvote svg { width: 13px; height: 13px; }
+
+  .btn-mark-answered {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 100px;
+    padding: 5px 13px;
+    font-family: var(--font-b);
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-mark-answered:hover { border-color: var(--green); color: var(--green); }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty svg { opacity: .25; margin-bottom: 14px; }
+  .empty p { font-size: 14px; }
+
+  /* ── ADMIN PANEL ── */
+  .admin-toggle {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 100px;
+    padding: 9px 18px;
+    font-family: var(--font-b);
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+    z-index: 100;
+  }
+  .admin-toggle:hover { color: var(--text); border-color: var(--accent); }
+
+  .admin-modal {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .admin-modal.open { display: flex; }
+  .admin-box {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    padding: 28px;
+    width: 100%; max-width: 340px;
+  }
+  .admin-box h3 {
+    font-family: var(--font-h);
+    font-size: 20px;
+    font-weight: 400;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+  .admin-box p { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+  .btn-close {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .btn-admin-login {
+    width: 100%;
+    padding: 11px;
+    background: var(--accent2);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    font-family: var(--font-b);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: opacity .2s;
+  }
+  .btn-admin-login:hover { opacity: .85; }
+  .admin-err { color: #f87171; font-size: 12px; margin-top: 8px; }
+
+  /* ── LOADING ── */
+  .loading-overlay {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 999;
+    transition: opacity .4s;
+  }
+  .loading-overlay.hide { opacity: 0; pointer-events: none; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    margin-bottom: 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-overlay p { color: var(--muted); font-size: 13px; }
+
+  /* ── CONFIG NOTICE ── */
+  .config-notice {
+    background: rgba(245,200,66,.07);
+    border: 1px solid rgba(245,200,66,.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--gold);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .config-notice strong { display: block; margin-bottom: 4px; font-size: 14px; }
+
+  @media (max-width: 480px) {
+    .hero { padding: 40px 16px 36px; }
+    .hero-stats { gap: 20px; }
+    .form-card { padding: 20px 16px; }
+    .q-card { padding: 14px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <p>Menghubungkan...</p>
+</div>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Sesi Berlangsung
+  </div>
+  <h1 id="hero-title">Nama Webinar</h1>
+  <p id="hero-subtitle">Topik / Tema Webinar</p>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-lbl">Pertanyaan</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-answered">0</div>
+      <div class="stat-lbl">Terjawab</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-pending">0</div>
+      <div class="stat-lbl">Menunggu</div>
+    </div>
+  </div>
+</header>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- Config notice (ditampilkan jika Firebase belum dikonfigurasi) -->
+  <div class="config-notice" id="config-notice" style="display:none">
+    <strong>⚠️ Konfigurasi Firebase diperlukan</strong>
+    Buka file <code>index.html</code> dan isi nilai <code>firebaseConfig</code> dengan kredensial proyekmu.
+    Ikuti panduan di bagian bawah halaman ini atau lihat README.
+  </div>
+
+  <!-- Form kirim pertanyaan -->
+  <div class="form-card">
+    <h2>Ajukan Pertanyaan</h2>
+    <div class="form-row">
+      <label for="inp-name">Nama Lengkap</label>
+      <input type="text" id="inp-name" placeholder="Tulis nama Anda..." maxlength="60" autocomplete="name" />
+    </div>
+    <div class="form-row">
+      <label for="inp-q">Pertanyaan</label>
+      <textarea id="inp-q" placeholder="Tulis pertanyaan Anda di sini..." maxlength="500"></textarea>
+      <div class="char-count"><span id="char-used">0</span>/500</div>
+    </div>
+    <button class="btn-submit" id="btn-submit">Kirim Pertanyaan</button>
+    <div class="submit-toast" id="submit-toast">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      Pertanyaan berhasil dikirim!
+    </div>
+  </div>
+
+  <!-- Filter & sort -->
+  <div class="filter-bar">
+    <div class="filter-tabs">
+      <button class="tab-btn active" data-filter="all">Semua</button>
+      <button class="tab-btn" data-filter="pending">Belum Dijawab</button>
+      <button class="tab-btn" data-filter="answered">Sudah Dijawab</button>
+    </div>
+    <span class="q-count" id="q-count-label">0 pertanyaan</span>
+  </div>
+
+  <!-- List pertanyaan -->
+  <div id="q-list">
+    <div class="empty" id="empty-state">
+      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+      </svg>
+      <p>Belum ada pertanyaan. Jadilah yang pertama!</p>
+    </div>
+  </div>
+</main>
+
+<!-- Admin toggle -->
+<button class="admin-toggle" id="admin-toggle-btn">⚙ Admin</button>
+
+<!-- Admin modal -->
+<div class="admin-modal" id="admin-modal">
+  <div class="admin-box">
+    <button class="btn-close" id="admin-close">×</button>
+    <h3 id="admin-title">Panel Admin</h3>
+    <div id="admin-login-view">
+      <p>Masukkan password admin untuk mengakses fitur moderasi.</p>
+      <label for="admin-pw">Password</label>
+      <input type="text" id="admin-pw" placeholder="Password..." />
+      <button class="btn-admin-login" id="admin-login-btn">Masuk</button>
+      <div class="admin-err" id="admin-err"></div>
+    </div>
+    <div id="admin-logged-view" style="display:none">
+      <p>Kamu masuk sebagai admin. Tombol <strong>"Tandai Terjawab"</strong> sekarang aktif di setiap pertanyaan.</p>
+      <button class="btn-admin-login" id="admin-logout-btn" style="background:var(--surface2);border:1px solid var(--border2);">Keluar dari Admin</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── STATE ────────────────────────────────────────────── */
+let questions = {};
+let filter    = 'all';
+let isAdmin   = false;
+let voted     = JSON.parse(localStorage.getItem('qa-voted') || '{}');
+let isConfigured = false;
+
+/* ── HELPERS ──────────────────────────────────────────── */
+function initials(name) {
+  return name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+}
+function timeAgo(ts) {
+  if (!ts) return '';
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff/60000);
+  if (m < 1)  return 'Baru saja';
+  if (m < 60) return m + ' mnt lalu';
+  const h = Math.floor(m/60);
+  if (h < 24) return h + ' jam lalu';
+  return Math.floor(h/24) + ' hari lalu';
+}
+function saveVoted() {
+  localStorage.setItem('qa-voted', JSON.stringify(voted));
+}
+function checkConfig() {
+  const k = document.querySelector('script[type=module]');
+  // simple heuristic: if databaseURL still has placeholder
+  isConfigured = !document.documentElement.innerHTML.includes('GANTI_PROJECT_ID');
+  if (!isConfigured) {
+    document.getElementById('config-notice').style.display = 'block';
+  }
+}
+
+/* ── RENDER ───────────────────────────────────────────── */
+function renderQuestions() {
+  const list = Object.entries(questions)
+    .map(([id, q]) => ({ id, ...q }))
+    .filter(q => {
+      if (filter === 'pending')  return !q.answered;
+      if (filter === 'answered') return !!q.answered;
+      return true;
+    })
+    .sort((a,b) => (b.votes||0) - (a.votes||0) || (b.createdAt||0) - (a.createdAt||0));
+
+  const total    = Object.keys(questions).length;
+  const answered = Object.values(questions).filter(q=>q.answered).length;
+  document.getElementById('stat-total').textContent    = total;
+  document.getElementById('stat-answered').textContent = answered;
+  document.getElementById('stat-pending').textContent  = total - answered;
+  document.getElementById('q-count-label').textContent =
+    list.length + ' pertanyaan';
+
+  const container = document.getElementById('q-list');
+  const empty     = document.getElementById('empty-state');
+
+  // remove old cards (keep empty-state)
+  [...container.querySelectorAll('.q-card')].forEach(el => el.remove());
+
+  if (list.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  list.forEach(q => {
+    const div = document.createElement('div');
+    div.className = 'q-card' + (q.answered ? ' answered' : '');
+    div.dataset.id = q.id;
+
+    const myVote = voted[q.id];
+
+    div.innerHTML = `
+      <div class="q-header">
+        <div class="avatar">${initials(q.name)}</div>
+        <div class="q-meta">
+          <div class="q-name">${escHtml(q.name)}</div>
+          <div class="q-time">${timeAgo(q.createdAt)}</div>
+        </div>
+        ${q.answered ? '<span class="badge-answered"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Dijawab</span>' : ''}
+      </div>
+      <div class="q-text">${escHtml(q.question)}</div>
+      <div class="q-actions">
+        <button class="btn-upvote ${myVote ? 'voted' : ''}" data-id="${q.id}">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/>
+            <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+          </svg>
+          ${q.votes || 0}
+        </button>
+        ${isAdmin && !q.answered ? `<button class="btn-mark-answered" data-id="${q.id}">✓ Tandai Terjawab</button>` : ''}
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+/* ── EVENTS ───────────────────────────────────────────── */
+document.getElementById('inp-q').addEventListener('input', function() {
+  document.getElementById('char-used').textContent = this.value.length;
+});
+
+// filter tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filter = btn.dataset.filter;
+    renderQuestions();
+  });
+});
+
+// upvote & mark-answered delegation
+document.getElementById('q-list').addEventListener('click', e => {
+  const upBtn = e.target.closest('.btn-upvote');
+  const mkBtn = e.target.closest('.btn-mark-answered');
+
+  if (upBtn) {
+    const id = upBtn.dataset.id;
+    if (voted[id]) return;
+    voted[id] = true;
+    saveVoted();
+    const q = questions[id];
+    const newVotes = (q.votes || 0) + 1;
+    window._update(window._ref(window._db, 'questions/' + id), { votes: newVotes });
+  }
+
+  if (mkBtn && isAdmin) {
+    const id = mkBtn.dataset.id;
+    window._update(window._ref(window._db, 'questions/' + id), { answered: true });
+  }
+});
+
+// submit
+document.getElementById('btn-submit').addEventListener('click', async () => {
+  const name = document.getElementById('inp-name').value.trim();
+  const q    = document.getElementById('inp-q').value.trim();
+  if (!name) { alert('Nama wajib diisi.'); return; }
+  if (!q)    { alert('Pertanyaan tidak boleh kosong.'); return; }
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = 'Mengirim...';
+
+  try {
+    await window._push(window._ref(window._db, 'questions'), {
+      name,
+      question:  q,
+      votes:     0,
+      answered:  false,
+      createdAt: window._serverTimestamp()
+    });
+    document.getElementById('inp-name').value = '';
+    document.getElementById('inp-q').value    = '';
+    document.getElementById('char-used').textContent = '0';
+    const toast = document.getElementById('submit-toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  } catch(err) {
+    alert('Gagal mengirim. Pastikan koneksi internet aktif.');
+    console.error(err);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Kirim Pertanyaan';
+});
+
+/* ── ADMIN ────────────────────────────────────────────── */
+document.getElementById('admin-toggle-btn').addEventListener('click', () => {
+  document.getElementById('admin-modal').classList.add('open');
+});
+document.getElementById('admin-close').addEventListener('click', () => {
+  document.getElementById('admin-modal').classList.remove('open');
+});
+document.getElementById('admin-login-btn').addEventListener('click', () => {
+  const pw = document.getElementById('admin-pw').value;
+  if (pw === window.ADMIN_PASSWORD) {
+    isAdmin = true;
+    document.getElementById('admin-login-view').style.display  = 'none';
+    document.getElementById('admin-logged-view').style.display = 'block';
+    document.getElementById('admin-title').textContent = '✓ Mode Admin Aktif';
+    document.getElementById('admin-toggle-btn').textContent = '⚙ Admin ✓';
+    renderQuestions();
+  } else {
+    document.getElementById('admin-err').textContent = 'Password salah.';
+  }
+});
+document.getElementById('admin-logout-btn').addEventListener('click', () => {
+  isAdmin = false;
+  document.getElementById('admin-login-view').style.display  = 'block';
+  document.getElementById('admin-logged-view').style.display = 'none';
+  document.getElementById('admin-title').textContent = 'Panel Admin';
+  document.getElementById('admin-pw').value = '';
+  document.getElementById('admin-toggle-btn').textContent = '⚙ Admin';
+  document.getElementById('admin-modal').classList.remove('open');
+  renderQuestions();
+});
+
+/* ── FIREBASE INIT ────────────────────────────────────── */
+document.addEventListener('firebase-ready', () => {
+  // set branding
+  document.getElementById('hero-title').textContent    = window.WEBINAR_TITLE;
+  document.getElementById('hero-subtitle').textContent = window.WEBINAR_SUBTITLE;
+  document.title = window.WEBINAR_TITLE + ' — Q&A';
+
+  checkConfig();
+
+  // listen realtime
+  window._onValue(window._ref(window._db, 'questions'), snapshot => {
+    questions = snapshot.val() || {};
+    // Firebase serverTimestamp returns null on first write, fix client-side
+    Object.keys(questions).forEach(id => {
+      if (!questions[id].createdAt) questions[id].createdAt = Date.now();
+    });
+    renderQuestions();
+    document.getElementById('loading').classList.add('hide');
+  }, err => {
+    console.error('Firebase error:', err);
+    document.getElementById('loading').classList.add('hide');
+    document.getElementById('config-notice').style.display = 'block';
+  });
+});
+
+// refresh time labels every minute
+setInterval(() => { if (Object.keys(questions).length) renderQuestions(); }, 60000);
+</script>
+
+<!--
+=================================================================
+  PANDUAN SETUP
+=================================================================
+
+LANGKAH 1 — Buat Firebase Project
+  1. Buka https://console.firebase.google.com
+  2. Klik "Add project", ikuti wizard
+  3. Di menu kiri: Build > Realtime Database > Create Database
+     - Pilih lokasi terdekat (misal asia-southeast1)
+     - Mulai dengan "Test mode" (ubah rules setelah selesai)
+
+LANGKAH 2 — Ambil Konfigurasi
+  1. Project Settings (ikon gear) > General
+  2. Scroll ke "Your apps" > klik ikon Web (</>)
+  3. Salin nilai firebaseConfig
+
+LANGKAH 3 — Isi Konfigurasi di file ini
+  Cari bagian /* GANTI BAGIAN INI */ di atas dan isi:
+  - apiKey, authDomain, databaseURL, projectId, dll.
+  - WEBINAR_TITLE, WEBINAR_SUBTITLE, ADMIN_PASSWORD
+
+LANGKAH 4 — Atur Firebase Rules (penting!)
+  Di Firebase Console > Realtime Database > Rules, gunakan:
+
+  {
+    "rules": {
+      "questions": {
+        ".read": true,
+        ".write": true,
+        "$questionId": {
+          ".validate": "newData.hasChildren(['name','question','votes','answered'])"
+        }
+      }
+    }
+  }
+
+LANGKAH 5 — Deploy ke GitHub Pages
+  1. Buat repository baru di GitHub (misal: webinar-qa)
+  2. Upload file index.html ini
+  3. Settings > Pages > Branch: main > Save
+  4. Tunggu ~1 menit, URL akan muncul:
+     https://USERNAME.github.io/REPO_NAME/
+
+SELESAI! Bagikan URL ke peserta webinar.
+
+Admin: klik tombol "⚙ Admin" di pojok kanan bawah,
+masukkan ADMIN_PASSWORD untuk mengaktifkan tombol "Tandai Terjawab".
+=================================================================
+-->
+</body>
+</html>
